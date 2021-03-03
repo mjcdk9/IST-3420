@@ -1,0 +1,105 @@
+---
+title: "Working with Relational Database"
+author: "Cui Zou"
+date: "Sep 13, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+In this example, we'll learn how to access a simple RDBMS, SQLite.
+
+We use the RSQLite package. If you haven't installed the RSQLite package, please run the following command:
+
+install.packages("RSQLite")
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+
+# 1. Connect to SQLite
+
+First, we need to load RSQLite package. Then we call the dbConnect() function in RSQLite package to connect to a SQLite database.
+
+```{r}
+# Load RSQLite package
+library("RSQLite")
+
+# Specify the database file
+dbfile <- "TelecomService.sqlite"
+
+# Create a database connection
+con <- dbConnect(dbDriver("SQLite"), dbname = dbfile)
+
+```
+
+# 2. List tables existing in database
+
+```{r}
+# Show existing tables
+dbListTables(con)
+
+```
+
+# 3. Read Data from SQLite
+
+After connection established, we can call dbGetQuery() function to get the result of SQL query.
+
+```{r}
+# Get call data
+call_data <- dbGetQuery(con, "SELECT * FROM Call")
+
+head(call_data)
+summary(call_data)
+str(call_data)
+
+```
+
+```{r}
+# Get contract data
+contract_data <- dbGetQuery(con, "SELECT * FROM Contract")
+
+head(contract_data)
+summary(contract_data)
+str(contract_data)
+
+```
+
+```{r}
+# Get both call and contract data
+all_data <- dbGetQuery(con,
+  "SELECT * FROM Call a, Contract b WHERE a.AreaCode = b.AreaCode AND a.Phone = b.Phone")
+
+head(all_data)
+summary(all_data)
+str(all_data)
+
+```
+
+Drop the last two columns as they contain the same information as column 15 & 16
+```{r}
+all_data <- subset(all_data, select = -c(22, 23))
+head(all_data)
+```
+
+
+
+
+

@@ -1,0 +1,289 @@
+---
+title: "Manipulating Strings"
+author: "Cui Zou"
+date: "Oc 3, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+Cleansing and manipulating data is an essential (usually the most time-consuming) part of a data analytics project. A properly prepared dataset is the prerequisite of statistical modeling, prediction, and inference. 
+
+In this section, we'll learn how to manipulate strings.
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+In many cases, you have to deal with textural data. There are many useful string manipulation functions in R. Below is a list of frequently used ones.
+
+# 1. General Functions
+
+- tolower(): translate to lower case
+- toupper(): translate to upper case
+- nchar(): count the number of characters
+- trimws(): trim whitespace [ \\t\\r\\n]
+- stringi::stri_reverse(): reverse a string
+
+As an example, we use the vector of row names of the mtcars dataset to show how to manipulate a vector of strings.
+
+```{r}
+car <- rownames(mtcars)
+
+print(car)
+```
+
+```{r}
+# Translate to lower case
+tolower(car)
+```
+
+```{r}
+# Translate to upper case
+toupper(car)
+
+```
+
+To count the number of characters in a string, do NOT use length(). length() returns the length of the vector containing the string. Instead, use nchar() function.
+
+```{r}
+# Count the number of characters
+nchar(car)
+
+```
+
+```{r}
+# The length of the vector
+length(car)
+
+```
+
+To trim whitespace [ \\t\\r\\n] (space, tab, newline, carriage return), we can use trimws() function.
+
+```{r}
+trimws("\n  Hello R! \t \r \n   ")
+
+```
+
+To reverse strings, we can use the stri_reverse() function in stringi package. To call a function not available in base R system, we can apply two methods: 
+
+- Method 1: Directly calling the function without loading the package by using "::";
+- Method 2: Load the package first, then call the function.
+
+
+```{r}
+# Directly use the function without loading the package
+stringi::stri_reverse("abcdef")  
+
+```
+
+```{r}
+# Or use the following statements
+require(stringi)
+stri_reverse("abcdef")
+```
+
+
+# 2. Pattern Matching and Replacement
+
+Regular expression is a pattern that describes a set of strings. Regular expression is a powerful technique for string matching and processing.
+
+To learn more about regular expressions in R, type ?regex in console window.
+
+- grep(): detect patterns
+- regexpr(): locate patterns (find starting position and length of first match)
+- sub(): replace the first match
+- gsub(): replace all matches
+
+For example, match a substring of 4 consecutive digits from the string "1/Jun/2016 2:35 PM". That is, to find the year information from the string. Here, we use regular expression "[0-9]{4}".
+
+```{r}
+# Match a pattern in a string
+pos1 <- regexpr("[0-9]{4}","1/Jun/2016 2:35 PM")
+pos1
+
+```
+
+```{r}
+# Position of the 1st match in the string
+pos1[[1]]
+```
+
+Another way is to use regex "[[:digit:]]{4}".
+
+```{r}
+# Match a pattern in a string
+pos1 <- regexpr("[[:digit:]]{4}","1/Jun/2016 2:35 PM")
+pos1
+
+```
+
+In the next example, we match all substrings of digit 2. We simply use "2" as the pattern to match.
+
+```{r}
+# Positions of all matches in the string
+pos2 <- gregexpr("2","1/Jun/2016 2:35 PM")
+pos2
+```
+
+```{r}
+# Position of the 1st match
+pos2[[1]][1]
+
+```
+
+```{r}
+# Position of the 2nd match
+pos2[[1]][2]
+
+```
+
+Another function to call is grep(). Those functions are similar. They differ in the format of and amount of detail in the results.
+
+```{r}
+# Show car vector
+print(car)
+
+```
+
+
+```{r}
+# The index of matched string in the vector 
+grep("Merc",car)
+
+```
+
+
+To replace matches, we can use sub() or gsub() function.
+
+```{r}
+# sub() replaces the first match
+sub("a","1","abcabcabc")
+
+```
+
+```{r}
+# gsub() replaces all matches
+gsub("a","1","abcabcabc") 
+
+```
+
+```{r}
+# Remove all digits by using regex
+gsub("[[:digit:]]","", "a1b2c3ef4gh55") 
+
+```
+
+# 3. Substrings
+
+- substr(x, start, stop)
+- substring(text, first, last = 1000000L)
+- substr vs substring?  substring has a default value for the last option: last = 1000000L while substr doesn't have a default value for the stop option.
+
+```{r}
+substr("abcdef", 2, 5)
+
+```
+
+```{r}
+substring("abcdef", 1, 1:6)
+
+```
+
+```{r}
+substring("abcdef", 1:6, 1:6)
+```
+
+
+# 4. Split Strings
+
+- strsplit(x, split, fixed = FALSE, perl = FALSE, useBytes = FALSE)
+
+```{r}
+strsplit("abcdef", NULL)  # Format: strsplit(x, split)
+
+```
+
+```{r}
+strsplit("a.b.c.d.e.f", "[.]")  # split argument is a regular expression
+
+```
+
+```{r}
+strsplit("a.b.c.d.e.f", ".", fixed = TRUE) # Use exact matching
+
+```
+
+```{r}
+strsplit("12 23   14 21 56 78 99  "," ")
+
+```
+
+```{r}
+strsplit("12 23   14 21 56 78 99  ","[[:blank:]]+") # Match blank characters one or more times
+
+```
+
+From above examples, you can find that the result of strsplit() function call is a list. To get a vector, we can unlist the result.
+
+```{r}
+unlist(strsplit("12 23   14 21 56 78 99  ","[[:blank:]]+"))  # To get a vector
+```
+
+
+# 5. Concatenate
+
+To concatenate string objects, we can call paste() or paste0(). The function paste0(...) is equivalent to paste(..., sep = ""), slightly more efficiently.
+
+-paste()
+-paste0()
+
+```{r}
+paste("abc","123",sep = "")
+
+```
+
+```{r}
+paste("abc","123",sep = ",")
+
+```
+
+```{r}
+paste0("abc","123")
+
+```
+
+```{r}
+nth <- paste0(1:12, c("st", "nd", "rd", rep("th", 9)))
+nth
+
+```
+
+```{r}
+month.abb
+
+```
+
+We can specify the "collapse" parameter to collapse the vector into a single string element with a character string to separate the parts.
+
+```{r}
+v1 <- paste(month.abb,nth,sep = ": ",collapse = "; ")
+nchar(v1)
+length(v1)
+```

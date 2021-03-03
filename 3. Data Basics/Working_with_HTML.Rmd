@@ -1,0 +1,142 @@
+---
+title: "Working with HTML"
+author: "Cui Zou"
+date: "Sep 13, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+In this example, we'll learn how to scrape data table from the following Wikipedia web page: 
+
+https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population
+
+We'll use the XML and httr packages. If you haven't installed them, please run the following command:
+
+install.packages("XML")
+install.packages("httr")
+
+The R Markdown has been updated on 9/13/2020.
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+```{r}
+# Load packages
+library("XML")
+library("httr")
+# Or you can use require() to load needed packages
+```
+
+
+# 1. Download HTML Content from Web
+
+First, specify the URL of the web page where we want to scrape data.
+
+```{r}
+# Specify URL
+url <- "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
+
+print(url)
+```
+
+Call the GET() function in the httr package to download the content of the web page.
+
+```{r}
+# Download the content of the URL
+url_content <- GET(url)
+
+print(substr(url_content,1,800))
+
+```
+
+# 2. Parse the HTML Content
+
+```{r}
+# Parse the HTML/XML content to generate an R structure representing the HTML/XML tree
+doc <- htmlParse(url_content)
+
+tables <- readHTMLTable(doc)
+
+str(tables)
+```
+
+
+```{r}
+# Convert the 1st element of the list to data frame
+pop_df <- data.frame(tables[1])
+
+attributes(pop_df)
+
+```
+
+# 3. Refine the Dataframe
+
+Show the structure of the dataframe.
+
+```{r}
+str(pop_df)
+```
+
+Show the head of pop_df
+
+```{r}
+head(pop_df)
+```
+
+
+Rename the column names of the dataframe.
+
+```{r}
+colnames(pop_df) <- c("Rank","Country/Territory","Population","Date","% of World Population","Source")
+
+is.factor(pop_df$Population)
+
+# Convert factors into numbers for Population column
+pop_df$Population <- as.numeric(gsub(",","",pop_df$Population))  # Use gsub() to remove all commas in Population
+
+str(pop_df)
+
+```
+
+Delete 1st row of pop_df
+
+```{r}
+pop_df_new <- pop_df[-c(1),]
+head(pop_df_new)
+```
+
+Change row names
+
+```{r}
+row.names(pop_df_new) <- 1:nrow(pop_df_new)
+head(pop_df_new)
+```
+
+
+
+Show the top 10 countries/territories.
+
+```{r}
+top10 <- head(pop_df_new, n = 10L)
+
+plot(top10$Population, type = "l")
+
+```

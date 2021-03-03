@@ -1,0 +1,158 @@
+---
+title: "Working with APIs"
+author: "Cui Zou"
+date: "Sep 13, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+In this example, we'll learn how to access data via application programming interfaces (APIs) provided by Steam.
+
+We need the rjson package. If you haven't installed the package, please run the following command:
+
+install.packages("rjson")
+
+Check the following website for the API specification: https://developer.valvesoftware.com/wiki/Steam_Web_API
+
+In the example, we choose "GetNewsForApp (v0002)" API to get the latest news of a game specified by its appID.
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+Set the AppID of game "Grand Theft Auto V". Set the number of latest news we want to get.
+
+
+```{r}
+appid <- 271590 # Choose Grand Theft Auto V whose App ID is 271590
+n_new <- 100 # Number of news to get
+```
+
+
+# 1. Get URL for the App
+
+```{r}
+# Generate url for the app
+url <- paste("http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=",
+             appid,
+             "&count=", n_new, "&maxlength=300&format=json",
+             sep = "")
+
+# Check the url again
+url
+```
+
+# 2. Get HTTP Content
+
+```{r}
+# Download HTTP response
+content = RCurl::getURI(url)
+
+# Print the first 800 characters
+print(substr(content,1,800))
+
+```
+
+From the above, we can find that the HTTP return is in JSON format. Now let's convert it into a list structure for better data management in R.
+
+```{r}
+# Create a list
+library("rjson")
+list <- fromJSON(content)
+
+# Show content in the list
+head(list$appnews$newsitems)
+
+```
+
+Show the 1st news item.
+
+```{r}
+list$appnews$newsitems[[1]]
+```
+
+Show the 2nd news item.
+
+```{r}
+list$appnews$newsitems[[2]]
+```
+
+
+# 3. Organize Data in Data Frame
+
+```{r}
+# Create a data frame
+# unlist function converts the list to vector with all the
+# atomic components are being preserved.
+
+df <- data.frame(matrix(unlist(list$appnews$newsitems), 
+                        ncol = 11, 
+                        nrow = n_new,
+                        byrow=T)
+                 )
+
+str(df)
+
+```
+
+```{r}
+head(df)
+```
+
+You'll notice that the column names do not make sense. Let's rename them.
+
+```{r}
+# Rename variables in the data frame
+colnames(df) <- names(list$appnews$newsitems[[1]])
+
+# show head of the data frame.
+head(df)
+
+```
+
+You'll notice that the date is shown as numbers (in strings actually). Let's convert it into a readable data type. Here we can use POSIXlt data type to represent data time. To learn more about this data type, type "?POSIXlt" in console window.
+
+```{r}
+# Add variable date2 to show the readable date time
+df$date <- as.POSIXlt(as.numeric(as.character(df$date)),origin = "1970-01-01")
+
+# Show head again
+head(df)
+
+```
+
+To learn more: Below shows how to convert between numbers and data time.
+ 
+```{r}
+now <- Sys.time()
+print(now)
+```
+
+```{r}
+n <- as.numeric(now)
+print(n)
+```
+
+To convert the number into data time.
+
+```{r}
+as.POSIXlt(n,origin = "1970-01-01")
+```
+

@@ -1,0 +1,179 @@
+---
+title: "Working with XML and JSON"
+author: "Cui Zou"
+date: "Sep 13, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+In this example, we'll learn how to access data stored in XML and JSON.
+
+We use the XML package. If you haven't installed the XML package, please run the following command:
+
+install.packages("XML")
+
+```{r}
+# Clean the environment
+rm(list = ls())
+
+# Load packages
+library("XML")
+library("RCurl")
+
+```
+
+
+# 1. Access XML
+
+## 1.1. Read XML
+
+First, we need to load XML package. Then we can call the xmlParse() function in XML package to parse and XML file to generate an R structure.
+
+```{r}
+# Load XML package
+library("XML")
+
+# Parse XML file to generate an R structure
+doc <- xmlParse(file = "Books.xml")
+
+# Show the content of doc
+print(doc)
+
+```
+
+```{r}
+# Get the root node
+top <- xmlRoot(doc)
+
+# Show the content of top
+print(top)
+
+```
+
+## 1.2. Explore XML
+
+Now, let's explore the root node of the XML document.
+
+```{r}
+# Show tage name of the root node
+xmlName(top)
+```
+
+```{r}
+# Show child nodes of the root node
+names(top)
+```
+
+```{r}
+# Show child nodes of the 1st book
+names(top[[1]]) 
+```
+
+```{r}
+# Show title of the 1st book
+top[[1]][["title"]]
+
+```
+
+```{r}
+# Show year of the 1st book
+top[[1]][["year"]] 
+```
+
+```{r}
+# Show price of the 1st book
+top[[1]][["price"]] 
+```
+
+## 1.3. Use XPath to Parse XML
+
+We can use xpathSApply() to extract information by XPath expression. The xpathSApply() is a simplified version of xpathApply() function.
+
+First, let's parse the title information from the XML object and store the information in a vector.
+
+```{r}
+b_title <- xpathSApply(doc,"//bookstore/book/title", xmlValue)
+
+print(b_title)
+```
+
+Use the same method to parse other information.
+
+```{r}
+b_category <- xpathSApply(doc,"//bookstore/book/@category")
+b_author <- xpathSApply(doc,"//bookstore/book/author", xmlValue)
+b_year <- xpathSApply(doc,"//bookstore/book/year", xmlValue)
+b_price <- xpathSApply(doc,"//bookstore/book/price", xmlValue)
+```
+
+## 1.4. Organize Information in Data Frame
+
+Now we have obtained all information stored in the XML object. Let's create a data frame to organize the structured information.
+
+```{r}
+# Generate a book data frame
+book_df <- data.frame(b_title,b_category,b_author,b_year,b_price)
+colnames(book_df) <- c("Title","Category","Author","Year","Price")
+print(book_df)
+```
+
+
+# 2. Access JSON
+
+Compared with XML, JSON is usually easier to access in R.
+
+We use the jsonlite package. If you haven't installed the package, please run the following command:
+
+install.packages("jsonlite")
+
+```{r}
+# Load jsonlite package
+library(jsonlite)
+
+```
+
+## 2.1. Convert between Data Frame and JSON
+
+We can convert a data frame to JSON.
+
+```{r}
+# data.frames must be converted into a list before converting into JSON
+j_book <- toJSON(as.list(book_df))
+print(j_book)
+
+```
+
+Or conver JSON back to data frame.
+
+```{r}
+# Convert JSON to data frame
+book_df2 <- data.frame(fromJSON(j_book))
+print(book_df2)
+```
+
+## 2.2. Read or Write JSON Files
+
+If we want to write the JSON object to a file, we can use the write_lines() function in readr package.
+
+```{r}
+library(readr)
+
+write_lines(j_book,"books.json")
+```
+

@@ -1,0 +1,56 @@
+---
+title: "factor2numeric"
+author: "Cui Zou"
+date: "9/27/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Why we can't use as.numeric() to convert factor directly into numeric?
+
+```{r}
+library(magrittr)
+
+# convert a numeric vector into factor
+num <- factor(c(9,8,10,8,9))
+str(num)
+
+# intend to convert factor into numeric, but only return level of each element
+num1 <- as.numeric(num)
+str(num1)
+num1
+
+# the mothod above is not working, let's change it into character first
+num2 <- as.character(num)
+str(num2)
+
+# use as.numeric(as.character()) to convert factor to numeric
+num3 <- num %>% 
+  as.character %>%
+  as.numeric
+str(num3)
+num3
+```
+
+## 2. What if we convert all factor variables in a data frame to numeric variables?
+
+mutate_if(df, is.factor, ~ as.numeric(as.character(.x)))
+
+Or
+
+mutate_if(df, is.factor, ~ as.numeric(levels(.x))[.x])
+
+** The latter is faster when you work with large data frame.**
+
+## 3. How to avoid unnecessary factors when read in data?
+
+Use the statement stringsAsFactors = FALSE
+e.g. df <- read.table(<path_to_your_data>, sep = "\t", stringsAsFactors = FALSE)
+
+source: https://community.rstudio.com/t/how-to-convert-factor-data-to-numeric-for-all-dataset/17626
+
+
+

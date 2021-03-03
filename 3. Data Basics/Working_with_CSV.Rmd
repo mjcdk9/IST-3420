@@ -1,0 +1,94 @@
+---
+title: "Working with CSV"
+author: "Cui Zou"
+date: "Sep 13, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # echo: whether to include R source code in the output file
+```
+
+&nbsp; 
+&nbsp;
+
+
+\newpage
+
+# 1. Read in Dataset
+```{r}
+# Clean the environment
+rm(list = ls())
+
+# Read data file
+call_data <- read.csv(file = "CallsData.csv", header = TRUE)
+```
+
+Another way is to use read.table() function. For example:
+call_data2 <- read.table("CallsData.csv", header = TRUE, sep = ",")
+
+# 2. Explore Data
+
+```{r}
+# Show the head of the dataset
+head(call_data)
+```
+
+```{r}
+# Show the structure of the dataset
+str(call_data)
+```
+
+```{r}
+# Summary statistics
+summary(call_data)
+```
+
+
+# 3. Create Phone Dataset
+
+```{r}
+# Select Area Code and Phone number and combine them into a matrix
+phone <- cbind(call_data$Area.Code, as.character(call_data$Phone))
+
+colnames(phone) <- c("AreaCode","PhoneNum")
+```
+
+show the head of phone dataset.
+```{r}
+head(phone)
+```
+
+Data structure.
+
+```{r}
+str(phone)
+```
+
+
+Summary statistics.
+
+```{r}
+summary(phone)
+```
+
+
+
+# 4. Write to CSV File
+
+We can use the write.csv() method to easily write a dataset to a CSV file.
+
+```{r}
+# Write the phone data into csv file under the current directory
+write.csv(phone, file = "Phone.csv")
+
+# Write the phone data into a .txt file, using tab as field separator
+write.table(phone, file = "Phone.txt", sep = "\t")
+```

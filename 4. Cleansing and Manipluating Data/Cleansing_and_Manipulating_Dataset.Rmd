@@ -1,0 +1,746 @@
+---
+title: "Cleansing and Manipulating Dataset"
+author: "Cui Zou"
+date: "Oct 3, 2020"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+Cleansing and manipulating data is an essential (usually the most time-consuming) part of a data analytics project.
+A properly prepared dataset is the prerequisite of statistical modeling, prediction, and inference.
+
+In this section, we'll learn how to cleanse, transform, manipulate dataset.
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+# 0. Forward Pipe Operator
+
+The forward pipe operator is supported by magrittr package. The syntax is "lhs %>% rhs". In order to use the forward pipe operator, you need to load the magrittr package. Or you can load the dplyr package which will also load the magrittr package.
+
+To learn more about forward pipe operator, type "?magrittr::`%>%`" in console window.
+
+```{r}
+# Load magrittr package
+library(magrittr)
+# The data give the speed of cars and the distances taken to stop. 
+# Note that the data were recorded in the 1920s.
+
+speed <- cars$speed
+
+print(speed)
+
+```
+
+```{r}
+# Find the max speed
+speed %>% max
+
+```
+
+```{r}
+# List unique speed values
+speed %>% unique
+
+```
+
+```{r}
+# List unique speed values and sort them by descending order
+speed %>% unique %>% sort(decreasing = TRUE)
+
+```
+
+```{r}
+# List top 5 speed values and sort them by descending order
+speed %>% unique %>% sort(decreasing = TRUE) %>% head(5)
+
+```
+
+When the lhs is not the first argument in rhs call, we can use the dot place-holder.
+
+```{r}
+# Use dot place-holder
+"Ceci n'est pas une pipe" %>% gsub("une", "un", .)
+```
+
+Understand below syntax:
+
+```{r}
+sample(1:10) %>% paste0(LETTERS[.])
+```
+
+What if you want to put number after letter?
+
+```{r}
+sample(1:10) %>% paste0(LETTERS[.], .) 
+```
+
+
+# 1. Create, Recode, and Rename Variables
+
+Let's create a data frame first, then use the data frame to show how to create, recode, and rename variables.
+
+```{r}
+patient <- data.frame(id = c("A01","A02","A03"),
+                      first.name = c("Mike","Emily","Hannah"),
+                      last.name = c("Smith","Johson", "Williams"),
+                      age = c(26,20,24),
+                      mass = c(150, 120, 110),
+                      height = c(70,68,67))
+print(patient)
+```
+
+
+## 1.1. Create Variables
+
+### 1.1.1. Use index ($ operator)
+
+```{r}
+# Copy the original dataset
+patient2 <- patient 
+# Add new variable full.name
+patient2$full.name <- paste(patient2$first.name,
+                            patient2$last.name,
+                            sep = " ")
+# Add new variable bmi
+patient2$bmi <- 703*patient2$mass/(patient2$height^2)
+
+patient2 %>% print
+
+```
+
+
+### 1.1.2. Use transform() function
+
+```{r}
+# Use transform()
+patient3 <- transform(patient,
+                      full.name = paste(first.name,last.name,sep = " "),
+                      bmi = 703*mass/(height^2))
+patient3 %>% print
+```
+
+### 1.1.3. Use dplyr::mutate() function
+
+```{r}
+## Use dplyr::mutate() ##
+patient4 <- dplyr::mutate(patient,
+                          full.name = paste(first.name,last.name,sep = " "),
+                          bmi = 703*mass/(height^2))
+patient4 %>% print
+
+```
+
+## 1.2. Recode Variables
+
+Recode the values of variables usually involves applying conditions.
+
+```{r}
+# Recode Variables
+patient4$bmi.category[patient4$bmi>=16 & patient4$bmi<18.5] <- "Underweight"
+patient4$bmi.category[patient4$bmi>=18.5 & patient4$bmi<25] <- "Normal"
+
+patient4$age.group = ifelse(patient4$age>=25,"Older","Younger")
+
+patient4 %>% print
+
+```
+
+```{r}
+# Recode the ID
+patient4$id <- dplyr::recode(patient4$id,A01 = "B01", A02 = "B02", A03 = "B03")
+
+# Recode the age
+patient4$age <- dplyr::recode(patient4$age,`26` = 27L,`20` = 21L,`24` = 25L)
+
+patient4 %>% print
+
+```
+
+## 1.3. Rename Variables
+
+```{r}
+# Rename bmi.categrory as health.status
+names(patient4)[names(patient4) == "bmi.category"] <- "health.status"
+
+# Rename mass as weight
+patient4 <- dplyr::rename(patient4,weight = mass)
+
+patient4 %>% print
+
+```
+
+
+# 2. Convert Data
+
+Here, we read the dataset we collected from https://nrf.com/2015/top100-table.
+
+```{r}
+df <- read.csv("top100retailers2015.csv")
+# Show the structure of the dataset
+str(df)
+
+```
+
+```{r}
+summary(df)
+```
+
+We can notice that all variables except the first two are factor data (i.e., nominal scale). As a result, we cannot get correct summary statistics such as min, max etc. for nominal data.
+
+We need to convert these factors as numeric variables. The following example shows the conversion of the column named "RetailSales2014". Other columns/variables can be converted in the similar way.
+
+```{r}
+head(df$RetailSales2014)
+```
+
+
+```{r}
+
+df$RetailSales2014 <- df$RetailSales2014 %>%
+  gsub(",","",.) %>%
+  gsub("$","",.,fixed = TRUE) %>%
+  as.character() %>%
+  as.numeric()
+
+# Show the structure of the new variable
+str(df$RetailSales2014)
+
+```
+
+```{r}
+# Get summary statistics of the new variable
+summary(df$RetailSales2014)
+```
+
+
+# 3. Sort
+
+Load the built-in dataset mtcars. The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973-74 models).
+
+
+```{r}
+# Load dataset
+data(mtcars)
+
+# Show the strucure
+str(mtcars)
+```
+
+
+## 3.1. Use order() function in base R
+
+```{r}
+# Sort by mpg (ascending)
+mtcars[order(mtcars$mpg),]
+
+```
+```{r}
+# Sort by cyl (ascending) and hp (ascending)
+mtcars[order(mtcars$cyl, mtcars$hp),]
+
+```
+
+```{r}
+# Sort by cyl (ascending) and hp (descending)
+mtcars[order(mtcars$cyl, -mtcars$hp),]
+```
+
+
+## 3.2. Use arrange() function in dplyr package
+
+```{r}
+# Sort by mpg (ascending)
+mtcars %>% 
+  dplyr::arrange(mpg) %>%
+  head
+
+```
+
+```{r}
+# We don't know which cars have lowest mpg
+# Convert row names to an explicit variable
+cars <- tibble::rownames_to_column(mtcars, "brand")
+cars
+
+```
+
+
+```{r}
+# Sort by cyl (ascending) and hp (ascending)
+
+cars %>% 
+  dplyr::arrange(cyl,hp) %>%
+  head
+
+```
+
+
+```{r}
+# Sort by cyl (ascending) and hp (descending)
+
+cars %>% 
+  dplyr::arrange(cyl,desc(hp)) %>%
+  head
+
+```
+
+
+# 4. Subset
+
+We can use subset methods to select certain columns or certain observations.
+
+## 4.1. Use base R features
+
+### 4.1.1. Use index
+
+```{r}
+# Use index to select variables
+car1 <- mtcars[c("mpg","wt")]  # Select miles per gallon and weight
+names(car1)
+
+```
+
+```{r}
+car2 <- mtcars[c(1,6)]  # Select 1st and 6th variables, i.e. mpg and wt
+names(car2)
+
+```
+
+```{r}
+car3 <- mtcars[c(1:5,10)]  # Select 1st through 5th and 10th variables
+names(car3)
+
+```
+
+```{r}
+car4 <- mtcars[c(-3,-5)]  # Exclude the 3rd and 5th variables
+names(car4)
+
+```
+
+
+### 4.1.2. Use which() function
+
+```{r}
+# Use index and which() to select observations
+car5 <- mtcars[1:4,]  # First 4 observations
+car5
+```
+
+```{r}
+car6 <- mtcars[which(mtcars$mpg >= 25),]  # Select cars whose mpg >= 25
+car6
+
+```
+
+```{r}
+car7 <- mtcars[which(mtcars$mpg >= 25 & mtcars$gear == 4),]  # Select cars whose mpg >= 25 and gear == 4
+car7
+
+```
+
+```{r}
+# Use index and which() to select both observations and variables
+car8 <- mtcars[which(mtcars$mpg >= 25),c("mpg", "wt")]  # Select mpg and wt variables with mpg >= 25
+car8
+```
+
+
+### 4.1.3. Use subset() function
+
+```{r}
+# Use subset() function to select both observations and variables
+car11 <- subset(mtcars, select = c("mpg","wt"))  # Select mpg and wt variables
+names(car11)
+
+```
+
+```{r}
+car12 <- subset(mtcars, select = c(1,6))
+names(car12)
+
+```
+
+```{r}
+car13 <- subset(mtcars, select = mpg:wt)  # Select all variables between mpg and wt
+names(car13)
+
+```
+
+```{r}
+car14 <- subset(mtcars,mpg >= 25,select = c(mpg,wt)) # Select mpg and wt variables with mpg >= 25
+car14
+
+```
+
+```{r}
+car15 <- subset(mtcars,cyl == 6,select = c(1:6)) # Select 1st through 6th variables with cyl == 6
+car15
+```
+
+
+## 4.2. Use dplyr package
+
+```{r}
+## Load dplyr package
+library(dplyr)
+```
+
+
+### 4.2.1. Use dplyr::select() to select variables
+
+```{r}
+car21 <- select(cars,c(brand,mpg,wt))  # Select mpg and wt variables
+names(car21)
+
+```
+
+```{r}
+car22 <- select(cars,-c(mpg,wt))  # Select variables except mpg and wt
+names(car22)
+
+```
+
+```{r}
+car23 <- select(cars,contains("p"))  # Select variables containing "p"
+names(car23)
+
+```
+
+
+### 4.2.2. Use dplyr::filter() to select observations
+
+```{r}
+filter(cars,mpg >= 25)  # Select cars with mpg >= 25
+
+```
+
+```{r}
+filter(cars,mpg >= 25 & gear == 4)  # Select cars with mpg >= 25 and gear == 4
+
+```
+
+We can combine dplyr::select() and dplyr::filter().
+
+```{r}
+# Select mpg and wt variables with mpg >= 25 
+cars %>% 
+  filter(mpg >= 25) %>%
+  select(c(brand,mpg,wt))
+```
+
+```{r}
+# Another way
+cars %>% 
+  select(c(brand,mpg,wt)) %>%
+  filter(mpg >= 25)
+
+```
+
+
+# 5. Merge
+
+## 5.1. Use merge() function
+
+```{r}
+enrollment <- data.frame(courseId = "IST3420",
+                         studentId = c("201","202","501"))
+
+student <- data.frame(studentId = c("201","202","203"),
+                      name = c("Mike","Emily","Hannah"),
+                      department = c("IST","BUS","IST"))
+
+print(enrollment)
+
+```
+
+```{r}
+print(student)
+
+```
+
+```{r}
+# Inner join
+merge(x = enrollment, y = student, by = "studentId")
+
+```
+
+```{r}
+# Left outer join
+merge(x = enrollment, y = student, by = "studentId", all.x = TRUE)
+
+```
+
+```{r}
+# Right outer join
+merge(x = enrollment, y = student, by = "studentId", all.y = TRUE)
+
+```
+
+```{r}
+# Full outer join
+merge(x = enrollment, y = student, by = "studentId", all = TRUE)
+```
+
+
+## 5.2. Use join() function in plyr package
+
+```{r}
+# Load plyr package
+library("plyr")
+
+```
+
+```{r}
+print(enrollment)
+
+```
+
+```{r}
+print(student)
+
+```
+
+```{r}
+# Inner join
+join(enrollment,student,by = "studentId", type = "inner")
+
+```
+
+```{r}
+# Left outer join
+join(enrollment,student,by = "studentId", type = "left")
+
+```
+
+```{r}
+# Right outer join
+join(enrollment,student,by = "studentId", type = "right")
+
+```
+
+```{r}
+# Full outer join
+join(enrollment,student,by = "studentId", type = "full")
+
+```
+
+
+## 5.3. Use dplyr package
+
+The dplyr package provides 4 functions:
+
+- inner_join()
+- left_join()
+- right_join()
+- full_join()
+
+```{r}
+# Load dplyr package
+library("dplyr")
+
+```
+
+```{r}
+# Inner join
+inner_join(enrollment,student,by = "studentId") # This may not work (depends on the version of dplyr)
+
+```
+
+```{r}
+# Show the structure of data frames
+str(enrollment)
+
+```
+
+```{r}
+str(student)
+
+```
+
+```{r}
+# Change vectors from factor type to character type
+enrollment$courseId <- as.character(enrollment$courseId)
+enrollment$studentId <- as.character(enrollment$studentId)
+student$studentId <- as.character(student$studentId)
+student$name <- as.character(student$name)
+student$department <- as.character(student$department)
+
+```
+
+```{r}
+str(enrollment)
+
+```
+
+```{r}
+str(student)
+
+```
+
+```{r}
+inner_join(enrollment,student,by = "studentId") # Now it works
+
+```
+
+```{r}
+# Left outer join
+left_join(enrollment,student,by = "studentId")
+
+```
+
+```{r}
+# Right outer join
+right_join(enrollment,student,by = "studentId")
+
+```
+
+```{r}
+# Full outer join
+full_join(enrollment,student,by = "studentId")
+```
+
+
+# 6. Aggregate
+
+## 6.1. Use Base R
+
+In base R, we can call aggregate() function to group data and calculate summary statistics.
+
+```{r}
+attach(mtcars)
+
+# Use aggregate() function
+# For cars with different combination of cyl & vs, get mean value of other variables
+# and remove NA
+mtcars %>% aggregate(by=list(cyl,vs),FUN=mean, na.rm=TRUE)
+
+```
+
+
+## 6.2. dplyr Package
+
+In dplyr package, we can use:
+
+- group_by(): to group data
+- summarize(): to calculate summary statistics
+
+```{r}
+# Use dplyr::group_by() and dplyr::summarize() functions
+mtcars %>% 
+  group_by(cyl,vs) %>%
+  summarize(mean(mpg),mean(disp),mean(hp),mean(drat),mean(wt),mean(qsec),mean(am),mean(gear),mean(carb))
+
+```
+
+**Wait, the above aggregation does not work! We expect to get five observations of the aggregated dataset. Now we only get one. Why?**
+
+
+The reason is that we load plyr package in section 5.2. The plyr package has a function named "summarize". In the above R chunk, actually the function summarize() is the one in plyr package rather than the one in dplyr package. 
+
+To solve the problem, we can simply provide package name for the summarize() function. Another way is to unload plyr package (executing statement "detach(package:plyr)") and then execute the above R chunk. In the following, we choice the first solution.
+
+```{r}
+# Use dplyr::group_by() and dplyr::summarize() functions
+mtcars %>% 
+  group_by(cyl,vs) %>%
+  dplyr::summarize(mean(mpg),mean(disp),mean(hp),mean(drat),mean(wt),mean(qsec),mean(am),mean(gear),mean(carb))
+
+```
+
+```{r}
+# Aggregate by cyl and vs, show mean of mpg for each group
+mtcars %>% 
+  group_by(cyl,vs) %>% 
+  dplyr::summarize(mean(mpg))
+
+```
+
+```{r}
+# Aggregate by cyl and vs, show maximum mpg for each group
+mtcars %>% 
+  group_by(cyl,vs) %>% 
+  dplyr::summarize(max(mpg))
+```
+
+
+# 7. Reshape
+
+We can use tidyr package to change the layout of a dataset. There are two functions to call:
+
+- gather(data, key, value, .): to gather columns into rows
+- spread(data, key, value): to spread rows into columns
+
+```{r}
+# Load tidyr package
+library(tidyr)
+
+```
+
+## 7.1. Convert Wide Format to Long Format
+
+```{r}
+# A student score dataset in wide format
+score_wide <- data.frame(
+  name = c("Mike","Sarah","Helen"),
+  IST3420 = c(80,85,90),
+  IST1750 = c(78,81,91),
+  IST3423 = c(90,93,88)
+)
+print(score_wide)
+
+```
+
+```{r}
+## Gather columns into key-value pairs
+score_long <- score_wide %>% 
+  gather(course,score,IST3420, IST1750,IST3423)
+print(score_long)
+
+```
+
+```{r}
+# Another way to specify columns to gather
+score_wide %>% 
+  gather(course,score,c(IST3420, IST1750,IST3423))
+
+```
+
+```{r}
+# Still another way to specify columns to gather
+score_wide %>% gather(course,score,-name)
+
+```
+
+## 7.2. Convert Long Format to Wide Format
+
+```{r}
+## Print the long format
+print(score_long)
+
+```
+```{r}
+## Split a single character column into multiple columns
+score_long %>% 
+  spread(course,score)
+```
+

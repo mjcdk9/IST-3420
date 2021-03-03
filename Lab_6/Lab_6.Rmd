@@ -1,0 +1,83 @@
+---
+title: "Lab_6"
+author: "Mark Chafin"
+date: "3/1/2021"
+output:
+  
+  html_document:
+  df_print: paged
+  toc: yes
+  toc_depth: '3'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+library(dplyr)
+library(tidyr)
+```
+
+# 1 Download “top100retailers2015.csv” and read the csv file into R.
+```{r}
+df <- read.csv("top100retailers2015.csv")
+
+```
+# 2 Get its structure and summary statistics.
+```{r}
+str(df)
+summary(df)
+```
+
+# 3 Use regular expressions and forward pipe operators (magrittr::%>%) to remove special characters (e.g. $ % ,) from the following columns, then convert those columns into numeric data [use as.numeric(as.character())]
+```{r}
+
+for (i in 5:10) {
+   df[,i] <- df[,i] %>%
+    gsub("[[:punct:]]","",.) %>% 
+    as.numeric(as.character())
+}
+head(df)
+str(df)
+```
+
+# 4 Create “City” and “State” columns from “Headquarter” [use regexpr() and substr(), or tidyr::separate()] 
+```{r}
+df <- separate(df, Headquarter, sep = ",", into =c("City", "State"))
+summary(df)
+
+```
+
+# 5 Show summary statistics of the new dataset and remove variable X
+```{r}
+summary(df)
+df <- subset(df, select = -X)
+```
+
+# 6 Sort column RetailSales2014 in descending order and show the head 
+```{r}
+df <- df %>% 
+  arrange(desc(RetailSales2014))
+head(df)
+```
+
+# 7 Save the cleansed dataset as top100retailers_clean.csv
+```{r}
+write.csv(df, file = "top100retailers_clean.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
