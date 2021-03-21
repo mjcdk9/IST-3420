@@ -1,0 +1,208 @@
+---
+title: "US Population on Map"
+author: "Cui Zou"
+date: "Sep 29, 2019"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+This example demonstrate the visualization of a spatial dataset: the US population data. The original dataset of US population by state was collected from U.S. Census Bureau (https://www.census.gov/popest/data/state/totals/2015/tables/NST-EST2015-01.csv). To simplify the case, this example only uses the 2010 data.
+
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+
+# 1. Read in Population Data
+
+```{r}
+# Read population data
+pop <- read.csv("US_Population_2010.csv")
+str(pop)
+```
+
+```{r}
+# Loiad magrittr package for forward pipe operator
+library(magrittr)
+
+# List all states in population dataset
+pop_state <- pop$States %>% tolower %>% unique
+
+print(pop_state)
+```
+
+As we can see, the population dataset contains state names. We can use the state names to link the population dataset to a spatial dataset that contains the map boundary information for all US states.
+
+
+# 2. Prepare for Spatial Data
+
+In this example, we use the map_data() function in the "ggplot2" package to create the spatial dataset for all US states.
+
+```{r}
+# Load ggplot2 package
+library(ggplot2)
+```
+
+```{r}
+# Create a data frame of map data for all states
+us_states <- map_data("state")
+str(us_states)
+```
+
+```{r}
+# List all states in map dataset
+map_state <- unique(us_states$region)
+
+print(map_state)
+```
+
+In order to correctly visualize population data on a map, we have to make sure that the state names in the population dataset match the names in the spatial dataset. Let's use the setdiff() function to find the difference of the state names in two datasets. 
+
+```{r}
+# Find set difference.
+setdiff(pop_state,map_state)
+
+```
+
+We find that Alaska, Hawaii, and Puerto Rico are not included in the map dataset. That means we will ignore these states/territories.
+
+
+# 3. Visualize Population on Map
+
+## 3.1 Method 1 without dataset merge
+
+As we can find from the dataset, the state names in population dataset have the first letter capitalized, while the states in the map dataset are in lower case. Because we use the state names to link the two datasets, we have to make sure the states names are represented in the same way. Thus, let's just change the state names in population dataset to lower case. In order to not change the original state names, here we use another column "region" to store the lower case state names.,
+
+```{r}
+pop$region <- tolower(pop$States)
+unique(pop$region)
+```
+
+Before we actually plot the data on the map, let's explore the values of population.
+
+```{r}
+# Show states with large population
+head(pop[order(pop$Census,decreasing = TRUE),])
+```
+
+From above, we can find the population values are relatively large. We don't want to plot large numbers on a graph. Let's convert the unit in order to better plot these values on graph.
+
+```{r}
+
+# Calculate population in millions
+pop$pop_mil <- pop$Census/1000000
+
+# Show states with large population in millions
+head(pop[order(pop$pop_mil,decreasing = TRUE), c('region','pop_mil')])
+
+```
+
+Now, let's draw the map!
+
+```{r, warning=FALSE}
+# Draw a blank US map first
+gg <- ggplot()
+
+gg <- gg + geom_map(data = us_states, map = us_states,
+                    aes(x = long, y = lat, map_id = region),
+                    fill="#ffffff", color="#ffffff", size=0.15)
+gg
+
+```
+
+
+```{r}
+# Fill color of each state by its population
+gg <- gg + geom_map(data=pop, map=us_states,
+                    aes(fill=pop_mil, map_id=region),
+                    color="#ffffff", size=0.15)
+gg
+
+```
+
+```{r}
+
+gg <- gg + scale_fill_continuous(low='thistle2', high='darkred', 
+                                 guide='colorbar')
+gg <- gg + labs(fill = "Population (Millions)",
+                title = "US Population (2010)",
+                x="", y="")
+
+gg <- gg + theme(panel.border = element_blank())
+gg <- gg + theme(panel.background = element_blank())
+gg <- gg + theme(axis.ticks = element_blank())
+gg <- gg + theme(axis.text = element_blank())
+
+gg
+
+```
+
+
+```{r}
+# This map looks distorted, let's change it a little bit
+
+gg <- gg + coord_map()
+
+gg
+```
+
+
+
+## 3.2. Method 2 (Use Merged Data)
+
+Another method is to merge the population dataset and map dataset together, then visualize the data.
+
+```{r}
+# Merge popuation and map data
+pop_map <- merge(us_states, pop, by="region")
+summary(pop_map$Census)
+```
+
+```{r}
+summary(pop_map$pop_mil)
+```
+
+```{r}
+str(pop_map)
+```
+
+
+```{r}
+ggplot() + 
+  geom_polygon(data = pop_map,
+               aes(x=long, y=lat, group = group, fill=pop_map$pop_mil),
+               colour="black") + 
+  scale_fill_continuous(low = "white", high = "red", guide="colorbar") + 
+  theme_bw() +
+  labs(fill = "Population(Millions)",
+       title = "US Population by State (2010)",
+       x="", y="") +
+  scale_y_continuous(breaks=c()) +
+  scale_x_continuous(breaks=c()) + 
+  theme(panel.border =  element_blank()) +
+  coord_map()
+
+```
+
+Notice that we use different themes for the two plots.
+
+
+

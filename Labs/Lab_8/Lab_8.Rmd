@@ -1,0 +1,103 @@
+---
+title: "Lab_8"
+author: "Mark Chafin"
+date: "3/15/2021"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+```
+# 1 
+Download the cleansed weblog analytics data file “weblog_clean.jsonl” and read it into R (2pts). Note: The data file is in the format of JSON Lines. You should load “jsonlite” package and call stream_in() function to stream JSON input:
+library(jsonlite)
+weblog <- stream_in(file("weblog_clean.jsonlines"))
+
+```{r}
+library(dplyr)
+library(jsonlite)
+weblog <- stream_in(file("weblog_clean.jsonlines"))
+```
+
+# 2
+Show the structure of the dataset.
+
+```{r}
+str(weblog)
+```
+
+# 3
+Change the data type of “request.datetime” as POSIXct by using the as.POSIXct() function (2 pts).
+
+```{r}
+weblog$request.datetime <- as.POSIXct(weblog$request.datetime, format = "%Y-%m-%d %H:%M:%S")
+```
+
+# 4
+Show summary statistics of the dataset.
+```{r}
+summary(weblog)
+```
+
+# 5
+Get the frequency distribution of weekday by using table() function (1 pt). Which day has the largest number of visits (1 pt)?
+```{r}
+weekday.freq <- table(weblog$weekday)
+sort(weekday.freq)
+print("Has the largest number of visits")
+weekday.freq %>% which.max() 
+```
+
+# 6
+Cross tabulate weekday and request.uri (1 pt)(refer to the two-way frequency table on slide 17 of Chapter 5). How many visits of the “faq.html” page on Fridays (1 pt)? 
+```{r}
+cross_tabulate <- table(weblog$weekday, weblog$request.uri)
+cross_tabulate 
+print("There are 4407 visits on the faq.html page on Friday")
+```
+
+# 7
+Draw a bar plot to show the distribution of visits by weekday (2 pts).
+```{r}
+weblog.barplot <- table(weblog$weekday)
+barplot(weblog.barplot, col = rainbow(20), cex.names = .8)
+```
+
+# 8
+Draw a stacked bar plot to show the distribution of visits by request.uri and request.method (use request.method to group visits) (2 pts).
+```{r}
+weblog.stacked <- table(weblog$request.method, weblog$request.uri)
+barplot(weblog.stacked,
+        main = "Distributuion of Visits",
+        col = rainbow(3),
+        legend = rownames(weblog.stacked))
+```
+
+# 9
+Draw a pie chart to present the distribution of visits by request.uri and show the count of visits for each URI (2 pts).
+```{r}
+weblog.piechart <- table(weblog$request.uri)
+labels <- paste(names(weblog.piechart),"\n", weblog.piechart, sep = "")
+pie(weblog.piechart, labels = labels, col = rainbow(5))
+```
+
+# 10
+Draw a pie chart to present the distribution of visits by request.uri and how the percentage of visits for each URI (2 pts).
+```{r}
+piechart <- round(weblog.piechart/sum(weblog.piechart)*100, digits = 1)
+label2 <- paste(names(weblog.piechart), " visits\n", paste(piechart,"%"), sep="")
+pie(piechart,
+    labels = label2,
+    col=rainbow(length(label2)))
+```
+
+# 11
+Calculate 5-number summary for reponse.size by using quantile() function (2 pts).
+```{r}
+quantile(weblog$response.size)
+```
