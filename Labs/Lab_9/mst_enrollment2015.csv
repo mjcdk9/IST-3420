@@ -1,0 +1,142 @@
+"","Country","State","X2011","X2012","X2013","X2014","X2015"
+"1","United States","Armed Forces Europe",2,0,0,0,1
+"2","United States","Armed Forces Pacific",1,1,1,1,0
+"3","United States","Alabama",11,13,15,14,23
+"4","United States","Alaska",11,9,9,6,7
+"5","United States","Arizona",20,23,22,22,18
+"6","United States","Arkansas",55,45,44,41,44
+"7","United States","California",62,58,50,50,56
+"8","United States","Colorado",37,31,44,42,39
+"9","United States","Connecticut",4,2,3,2,2
+"10","United States","Delaware",6,4,4,4,4
+"11","United States","District of Columbia",1,0,0,2,2
+"12","United States","Florida",27,35,28,30,25
+"13","United States","Georgia",25,20,10,13,23
+"14","United States","Hawaii",6,3,3,6,6
+"15","United States","Idaho",5,5,3,3,4
+"16","United States","Illinois",459,484,500,521,568
+"17","United States","Indiana",29,34,30,36,29
+"18","United States","Iowa",36,36,36,32,33
+"19","United States","Kansas",135,146,130,114,96
+"20","United States","Kentucky",22,19,23,16,17
+"21","United States","Louisiana",13,9,9,7,7
+"22","United States","Maine",0,0,1,1,2
+"23","United States","Maryland",12,10,16,16,20
+"24","United States","Massachusetts",15,12,14,12,11
+"25","United States","Michigan",27,29,25,25,22
+"26","United States","Minnesota",19,20,16,20,23
+"27","United States","Mississippi",7,5,2,6,6
+"28","United States","Missouri",5058,5151,5440,5680,5986
+"29","United States","Montana",6,5,5,5,5
+"30","United States","Nebraska",35,34,37,37,33
+"31","United States","Nevada",4,6,6,4,4
+"32","United States","New Hampshire",2,2,1,2,2
+"33","United States","New Jersey",3,6,8,8,6
+"34","United States","New Mexico",13,7,8,12,13
+"35","United States","New York",23,20,23,80,70
+"36","United States","North Carolina",19,13,13,12,13
+"37","United States","North Dakota",3,2,4,3,1
+"38","United States","Ohio",28,22,22,22,24
+"39","United States","Oklahoma",51,54,44,54,64
+"40","United States","Oregon",8,7,10,16,11
+"41","United States","Pennsylvania",27,33,37,42,37
+"42","United States","Rhode Island",0,1,1,2,1
+"43","United States","South Carolina",10,9,11,11,12
+"44","United States","South Dakota",2,5,5,5,4
+"45","United States","Tennessee",17,16,19,21,14
+"46","United States","Texas",139,148,128,135,147
+"47","United States","Utah",8,4,10,12,5
+"48","United States","Vermont",1,1,2,2,1
+"49","United States","Virginia",15,18,20,12,18
+"50","United States","Washington",52,52,45,59,62
+"51","United States","West Virginia",5,8,9,7,8
+"52","United States","Wisconsin",17,20,22,24,22
+"53","United States","Wyoming",3,6,4,4,2
+"54","American Samoa","",1,1,1,0,0
+"55","Angola","",0,0,0,1,1
+"56","Australia","",2,4,3,1,4
+"57","Austria","",0,1,0,0,0
+"58","Bahamas","",1,0,0,0,0
+"59","Bangladesh","",4,5,5,8,11
+"60","Belgium","",1,0,0,0,0
+"61","Bolivia","",1,1,0,0,1
+"62","Botswana","",35,27,41,50,44
+"63","Brazil","",2,14,15,8,8
+"64","Canada","",6,3,9,6,7
+"65","Chile","",0,0,1,1,0
+"66","China","",195,270,322,338,358
+"67","Colombia","",8,7,5,3,3
+"68","Cote D'Ivoire","",0,0,1,1,1
+"69","Czech Republic","",0,0,0,0,1
+"70","Dominican Republic","",1,1,1,2,3
+"71","East Timor","",0,0,1,1,0
+"72","Egypt","",1,1,4,7,6
+"73","Eritrea","",0,0,0,0,0
+"74","Ethiopia","",1,1,2,3,2
+"75","Finland","",1,4,1,2,1
+"76","France","",1,1,1,2,2
+"77","Georgia","",2,2,2,4,3
+"78","Germany","",5,6,6,6,6
+"79","Ghana","",6,9,8,9,11
+"80","Greece","",0,0,0,1,1
+"81","Guam","",1,1,1,1,0
+"82","Guatemala","",1,1,1,1,1
+"83","Haiti","",0,1,0,0,0
+"84","Hong Kong","",1,1,0,2,1
+"85","Iceland","",0,0,0,0,1
+"86","India","",270,230,306,393,352
+"87","Indonesia","",1,1,0,0,0
+"88","Iran (Islamic Republic Of)","",32,39,40,36,38
+"89","Iraq","",0,13,30,38,46
+"90","Israel","",1,0,0,0,1
+"91","Italy","",2,3,3,2,5
+"92","Japan","",1,1,0,0,0
+"93","Jordan","",3,3,4,3,5
+"94","Kazakhstan","",1,0,0,0,0
+"95","Kenya","",2,1,0,0,0
+"96","Korea, Republic of","",5,8,10,8,9
+"97","Kuwait","",11,15,16,20,18
+"98","Latvia","",0,0,0,1,1
+"99","Libyan Arab Jamahiriya","",22,20,25,22,19
+"100","Lithuania","",0,0,0,0,1
+"101","Malaysia","",15,9,5,9,10
+"102","Maldives","",1,0,1,12,13
+"103","Malta","",0,0,1,1,1
+"104","Mexico","",4,5,8,9,5
+"105","Mongolia","",1,0,0,0,0
+"106","Nepal","",5,7,9,15,14
+"107","New Zealand","",0,0,0,0,1
+"108","Nigeria","",13,12,15,13,9
+"109","Norway","",0,0,0,0,2
+"110","Oman","",1,2,2,10,0
+"111","Pakistan","",6,5,11,1,10
+"112","Panama","",0,1,1,0,0
+"113","Peru","",2,3,2,0,0
+"114","Poland","",1,0,0,0,0
+"115","Portugal","",0,0,0,1,0
+"116","Puerto Rico","",0,1,2,5,4
+"117","Russian Federation","",3,5,4,4,3
+"118","Saudi Arabia","",121,89,100,105,80
+"119","Singapore","",0,1,0,0,0
+"120","Slovenia","",1,1,1,1,0
+"121","South Africa","",1,1,0,0,0
+"122","Spain","",3,2,5,3,2
+"123","Sri Lanka","",84,69,85,119,67
+"124","Sudan","",0,0,0,0,1
+"125","Suriname","",0,0,0,1,2
+"126","Sweden","",0,0,1,1,1
+"127","Switzerland","",1,1,1,0,0
+"128","Taiwan","",6,4,2,2,4
+"129","Tanzania, United Republic of","",0,0,1,1,1
+"130","Thailand","",6,2,14,12,12
+"131","Trinidad and Tobago","",1,1,0,0,0
+"132","Tunisia","",0,1,0,0,0
+"133","Turkey","",13,15,14,12,10
+"134","Uganda","",1,1,0,0,0
+"135","Ukraine","",0,1,1,1,1
+"136","United Arab Emirates","",0,1,1,4,5
+"137","United Kingdom","",2,2,1,1,1
+"138","Venezuela","",2,2,2,1,1
+"139","Viet Nam","",2,2,2,3,1
+"140","Yugoslavia","",1,1,0,0,0
+"141","Zimbabwe","",1,1,1,1,3

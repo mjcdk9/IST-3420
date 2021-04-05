@@ -1,0 +1,117 @@
+---
+title: "Lab_9"
+author: "Mark Chafin"
+date: "3/30/2021"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list=ls())
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# 1
+Download Missouri S&T's enrollment file “mst_enrollment2015.csv  download” and read it into R.
+```{r}
+df <- read.csv("mst_enrollment2015.csv")
+```
+
+# 2
+Show all the unique countries of MST students. (1 point) How many countries are there? (1 point) 
+```{r}
+unique_countries <- unique(df$Country)
+length(unique_countries)
+# There are 89 unique countries
+```
+
+# 3
+Then let's focus on domestic students and use dplyr::filter() to select students come from the US. (2 point)
+```{r}
+df <- df[-1]
+df <- df %>% filter(Country == "United States")
+```
+
+# 4
+Use tidyr:: gather to reshape the dataset by transforming it from wide format to long format, using “Year” as key and “Enroll” as value. (2 points)
+
+```{r}
+df <- df %>% gather(Year, Enroll ,c(X2011,X2012,X2013,X2014,X2015))
+df
+```
+# 5
+Use dplyr::group_by to aggregate enrollment data into state level, i.e. calculate total enrollment for each state. (2 points)
+
+```{r}
+df <- df %>% group_by(State) %>% summarise(Total_Enroll = sum(Enroll))
+
+df
+```
+# 6
+Since our task is to plot out-of-state enrollment, use dplyr::filter() to remove enrollment data of Missouri (in-state enrollment). (2 point)
+
+```{r}
+df <- df %>% filter(State != "Missouri")
+```
+# 7
+Show the top 6 states from which the out-of-state students come and their corresponding enrollment number. (2 points)
+
+```{r}
+df <- arrange(df,-Total_Enroll)
+head(df)
+```
+# 8
+Use ggplot2 package to draw the MST's out-of-state enrollment on the US states map. (6 points)
+
+```{r}
+us_states <- map_data("state")
+str(us_states)
+map_state <- unique(us_states$region)
+df$Region <- tolower(df$State)
+setdiff(df$Region,map_state)
+```
+
+```{r, warning=FALSE}
+gg <- ggplot()
+gg <- gg + geom_map(data = us_states, map = us_states,
+                    aes(x = long, y = lat, map_id = region),
+                    fill="#ffffff", color="#ffffff", size=0.15)
+
+gg
+
+
+gg <- gg + geom_map(data=df, map = us_states,
+                    aes(fill=Total_Enroll, map_id=Region),
+                    color="#ffffff", size=0.15)
+gg
+
+```
+
+```{r}
+gg <- gg + scale_fill_continuous(low = "lightgreen", high= "darkgreen",
+                                 guide="colorbar")
+gg <- gg + labs(fill = "Enrollment",
+                title = "US Enrollment",
+                x = "", y="")
+
+gg <- gg + theme(panel.border = element_blank())
+gg <- gg + theme(panel.background = element_blank())
+gg <- gg + theme(axis.ticks = element_blank())
+gg <- gg + theme(axis.text = element_blank())
+
+gg
+```
+
+# 9
+Knit your R Markdown file into an HTML file and upload both R Markdown file and associated HTML file to Canvas (2pts).
+
+```{r}
+
+```
+
