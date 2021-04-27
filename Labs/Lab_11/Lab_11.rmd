@@ -1,0 +1,80 @@
+---
+title: "R Notebook"
+author: "markchafin"
+date: "4/19/21"
+output:
+  html_document:
+    df_print: paged
+---
+
+# 1
+    Show the structure and head of the mtcars dataset. We focus on the following two variables:
+mpg: miles per gallon
+am: transmission (0 = automatic, 1 = manual)
+```{r}
+rm(list = ls())
+library(dplyr)
+library(ggplot2)
+
+str(mtcars)
+head(mtcars)
+df <- select(mtcars, 1, 9)
+
+mtcars$am <- as.factor(mtcars$am)
+levels(mtcars$am) <- c("Automatic", "Manual")
+```
+
+# 2
+We want to visualize the difference of mpg between two types of transmission. Draw a boxplot of mpg grouped by transmission type (two boxplots on the same figure, each representing one transmission type) (2pts).
+```{r}
+
+ggplot(mtcars, aes(x=factor(am),y=mpg,fill=factor(am)))+
+  geom_boxplot(notch=F)+
+  scale_x_discrete("Transmission")+
+  scale_y_continuous("Miles per Gallon")+
+  ggtitle("MPG by Transmission Type")
+```
+# 3
+What conclusion could you get from the above boxplot (2pts)?
+Manual transmissions have a higher fuel efficiency
+# 4
+Now we want to use hypothesis testing method to test if manual transmission cars have better miles per gallon than automatic transmission cars. Specify your null and alternative hypothesis (4pts).
+
+H0 mean(manualdata$mpg) < mean(autodata$mpg) 
+Ha mean(manualdata$mpg) > mean(autodata$mpg) 
+
+```{r}
+autoData <- mtcars[mtcars$am == "Automatic",]
+manualData <- mtcars[mtcars$am == "Manual",]
+ttest <- t.test(autoData$mpg, manualData$mpg, alternative = "less", mu = 0)
+ttest
+
+
+autoData <- mtcars[mtcars$am == "Automatic",]
+manualData <- mtcars[mtcars$am == "Manual",]
+ttest <- t.test(autoData$mpg, manualData$mpg, alternative = "greater", mu = 0)
+ttest
+
+
+
+t.test(mpg~am, data = mtcars)
+
+t.test(autoData$mpg, data = autoData)
+t.test(manualData$mpg, data = manualData)
+
+
+```
+# 5
+What is the appropriate hypothesis testing method: one-sample or two-sample (2pts)? Paired or unpaired (2pts)? Why (2pts)? Two-sample, unpaired. the two-sample is required to show the correlation between mpg and transmission (am) and you can't do a paired test unless you clean the data and make the sample sizes the same, since the two datasets are not equal.
+# 6
+Use the appropriate method from step 5 to test the hypothesis (2pts).
+```{r}
+t.test(mpg~am, data = mtcars, alternative = "less")
+```
+
+# 7
+Explain the hypothesis result (2pts).
+My hypothesis results show the manual cars have a higher mpg than automatic cars. This data is from 1974 Motor Trend US magazine. Todays data could be different.
+
+# 8
+Knit your R Markdown file into an HTML file and upload both R Markdown file and associated HTML file to Canvas (2pts).

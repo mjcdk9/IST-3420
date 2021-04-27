@@ -1,0 +1,124 @@
+---
+title: "Data Exploration - Hypothesis Testing"
+author: "Cui Zou"
+date: "Oct 11, 2019"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+There are two methods t-test in R.
+
+t-test syntax 1:
+t.test(x, y = NULL, 
+       alternative = c("two.sided", "less", "greater"),
+       mu = 0, paired = FALSE, var.equal = FALSE,
+       conf.level = 0.95, ...)
+
+
+t-test syntax 2:
+ t.test(formula, data, subset, na.action, ...)
+
+
+# 1. One sample t-test
+
+One sample t-test is used when we want to compare one group to a hypothetical value.
+
+Suppose a car manufacturer claims that a model has a mpg >= 26. We want to test whether this is true by randomly collect mpg information from 10 cars of the model. Thus, the null and alternative hypotheses are:
+
+H0: mean(mpg)>=26
+
+Ha: mean(mpg) < 26
+
+
+```{r}
+# 10 mpg data points we collected
+mpg = c(24.2, 25.3, 23.8, 27.1, 28.0, 25.4, 22.7, 24.6, 25.9, 23.1)
+
+mean(mpg)
+```
+
+```{r}
+# One sample t-test
+t.test(mpg, alternative = "less", mu = 26)
+```
+
+Based on the above t-test, the null hypothesis is rejected ( p < 0.05). Thus, the manufacturer's claim is suspicious.
+
+# 2. Two sample t-test
+
+Two sample t-test is used when we want to compare two groups (paired or unpaired).
+
+In this case, we'll use the sleep dataset which shows the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients. Our research question is:
+
+Do the two soporific drugs have different effects on extra hours of sleep?
+
+Therefore, the null and alternative hypotheses are defined below:
+
+H0: mean(extra sleep) of drug 1 group = mean(extra sleep) of drug 2 group
+
+Ha: mean(extra sleep) of drug 1 group <> mean(extra sleep) of drug 2 group
+
+
+```{r}
+str(sleep)
+```
+
+First, let's draw a box plot to show the extra sleep hours between the two groups.
+
+```{r}
+# Draw box plot
+plot(extra ~ group, data = sleep, col = c("green","yellow"))
+```
+
+From the above box plot, we can find that the mean extra sleep hours seem to be different between the two drug groups. Now, let's formally test the hypothesis.
+
+```{r}
+# Select extra sleep hours for two drug groups
+extra1 <- sleep$extra[sleep$group == 1]
+extra2 <- sleep$extra[sleep$group == 2]
+
+t.test(extra1, extra2, alternative = "two.sided", mu = 0, paired = TRUE)
+
+```
+
+```{r}
+# A simpler syntax
+t.test(extra1, extra2, paired = TRUE)
+```
+
+
+```{r}
+# Use formula
+t.test(extra ~ group, data = sleep, paired = TRUE)
+```
+
+Whatever type of the specification method you use, you'll get evidance that the The null hypothesis is rejected ( p < 0.01). Thus, the two drugs have significantly different effects on extra hours of sleep.
+
+Pay attention that this is a two sample paired t-test. If you mistakenly use the unpaired t-test, the result will be different. For example,
+
+```{r}
+t.test(extra ~ group, data = sleep)
+```
+

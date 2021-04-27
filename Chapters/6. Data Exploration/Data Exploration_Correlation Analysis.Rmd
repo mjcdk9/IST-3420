@@ -1,0 +1,145 @@
+---
+title: "Data Exploration - Correlation Analysis"
+author: "Cui Zou"
+date: "Oct 11, 2019"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+
+# 1. Covariance
+
+We can simply use the coviance formula to calculate the covariance between two variables.
+
+```{r}
+x <- mtcars$mpg
+y <- mtcars$wt
+n <- length(x)
+x_hat <- mean(x)
+y_hat <- mean(y)
+
+sum((x-x_hat)*(y-y_hat))/(n-1)
+
+```
+
+Another way is to define a function to calculate covriance between two variables.
+
+```{r}
+# Define a function to calculate covariance
+mycov <- function(x,y){
+  n <- length(x)
+  x_hat <- mean(x)
+  y_hat <- mean(y)
+  sum((x-x_hat)*(y-y_hat))/(n-1)
+}
+
+```
+
+```{r}
+# Call the function
+cat("covariance =", mycov(mtcars$mpg,mtcars$wt))
+```
+
+```{r}
+# Another function call
+cat("covariance =", mycov(mtcars$hp,mtcars$wt))
+```
+
+A simpler way is to directly call the cov() function in the base R system.
+
+```{r}
+# Use cov() function to calculate variance
+cov(mtcars$mpg,mtcars$wt)
+```
+
+```{r}
+cov(mtcars$hp,mtcars$wt)
+```
+
+
+# 2. Correlation
+
+Similar to the covariance, we can manually calculate correlation coefficient.
+
+```{r}
+# Manually calculate correlation coefficient
+cov(mtcars$mpg,mtcars$wt)/(sd(mtcars$mpg)*sd(mtcars$wt))
+```
+
+Or we can simply call the cor() function to do the job.
+
+```{r}
+# Use cor() function to calculate correlation coefficient
+cor(mtcars$mpg,mtcars$wt)
+```
+
+```{r}
+cor(mtcars$hp,mtcars$wt)
+```
+
+# 3. Zero Covariance/Correlation
+
+Covariance and correlation can only measure linear relationship. A zero covariance or correlation does NOT mean that the two variables have no relationship.
+
+In the following example, we create two variables a and b and plot the relationship between these two variables.
+
+```{r}
+a <- seq(from = -5, to = 5, by = 0.1)
+b <- a^2
+
+plot(a,b)
+
+# Add linear regression line
+abline(lm(b~a),col = "red") 
+```
+
+From the above plot, we can see that a and b have a curvilinear relationship, b = a^2 + error.
+
+However, as shown below, the covariance and correlation between a and b are very small (close to zero).
+
+```{r}
+cov(a,b)
+```
+
+```{r}
+cor(a,b)
+```
+
+# 4. Visualization of a Correlation Matrix
+
+We can use the corrplot package to visualize correlation relationship between variables. This is useful especially when we have many variables.
+
+```{r}
+# install.packages("corrplot")
+library(corrplot)
+```
+
+```{r}
+corrplot(cor(mtcars), method="number", tl.cex = 1)
+```
+
+```{r}
+corrplot(cor(mtcars), method="ellipse", tl.cex = 1)
+```

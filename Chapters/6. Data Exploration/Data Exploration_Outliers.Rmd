@@ -1,0 +1,177 @@
+---
+title: "Data Exploration - Dealing with Outliers"
+author: "Cui Zou"
+date: "Oct 11, 2019"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+
+# 1. Detect outliers according to boxplot rule
+
+Let's generate 100 random values and manually change three elements as outliers.
+
+```{r}
+set.seed(1)
+x <- rnorm(100)
+# Intentionally add 3 outliers
+x <- c(x,-3.5, 3.3, 4.1)
+
+```
+
+```{r}
+plot(x)
+```
+
+Let's use the boxplot rule to detect outliers.
+
+```{r}
+# Create boxplot
+bp <- boxplot(x)
+```
+
+```{r}
+# Print boxplot object
+print(bp)
+```
+
+We notice that the boxplot object contains an element called "out". That is where the outliers are stored!
+
+```{r}
+# Print outliers
+bp$out
+```
+
+
+
+# 2. Detect outliers based on z-score
+
+Again, let's generate 100 random values.
+
+```{r}
+# Generate 100 random values
+set.seed(1)
+x <- rnorm(100)
+```
+Calculate the mean.
+```{r}
+mean(x)
+```
+
+Calculate standard deviation.
+
+```{r}
+sd(x)
+```
+
+```{r}
+# Intentionally add 3 potential outliers
+x <- c(x,-3.5, 3.3, 4.1)
+
+# Calculate mean
+mean(x)
+```
+```{r}
+# Calculate standard deviation
+sd(x)
+```
+
+We notice that the mean and standard deviation have been changed much after the three potential outliers have been added into the dataset.
+
+Now, let's calculate z score and use it to detect potential outliers. All values that have z scores beyond the range of [-3, 3] are potential outliers.
+
+```{r}
+# Calculate z-score
+z <- (x - mean(x))/sd(x)
+
+# Print outliers
+x[which(z > 3 | z < -3)] 
+```
+
+We noticed that we can only detect 2 outliers rather than 3. Why?
+
+In the 2nd condition, make sure to have a space between "<" and "-". Or else R may interpret "<-" as assignment rather than comparison.
+
+# 3. Detecting outliers using LOF algorithm
+
+Let's use the famous (Fisher's or Anderson's) iris dataset. The dataset gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+```{r}
+# Use the iris dataset, ignoring the last (5th) column
+dat <- iris[-5]
+
+str(dat)
+```
+
+Calculate local outlier factor score for each observation. Partition all observations into k = 5 clusters.
+
+```{r}
+# Load DMwR package
+library(DMwR)
+
+# Call the lofactor() in the DMwR package to calculate local outlier factor score
+dat$lof <- lofactor(data = dat, k = 5)
+
+str(dat)
+
+```
+
+We can plot the density of the LOF scores.
+
+```{r}
+plot(density(dat$lof))
+
+```
+
+Pick top 5 as outliers.
+
+```{r}
+library(magrittr)
+
+outliers <- dat %>% dplyr::arrange(desc(lof)) %>%
+  head(5)
+
+print(outliers)
+```
+
+Remove outliers from dataset.
+
+```{r}
+dat2 <- dplyr::filter(dat,!dat$lof %in% outliers$lof)
+
+str(dat2)
+```
+
+Notice that we use the %in% operator to evaluate whether LHS elements are in RHS. For example,
+
+```{r}
+## In set or not in set judgement
+1:4 %in% 1:2
+```
+
+```{r}
+!1:4 %in% 1:2
+```
+

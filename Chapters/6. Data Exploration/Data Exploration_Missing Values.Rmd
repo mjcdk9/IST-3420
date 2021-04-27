@@ -1,0 +1,211 @@
+---
+title: "Data Exploration - Dealing with Missing Values"
+author: "Cui Zou"
+date: "Oct 11, 2019"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+&nbsp;
+&nbsp;
+
+
+\newpage
+
+
+```{r}
+# Clean the environment
+rm(list = ls())
+```
+
+
+Here we use a simple vector to demonstrate how to deal with missing data.
+
+```{r}
+x <- c(1,2,3,4,NA)
+
+print(x)
+```
+
+# 1. Determine which elements are missing
+
+```{r}
+is.na(x)
+
+```
+
+# 2. Count missing values
+
+```{r}
+table(is.na(x))
+```
+
+# 3. Remove missing values
+
+```{r}
+x <- na.omit(x)
+x
+# The first line of the output consists of all cases that are not NA
+# However, the output also consists of additional information such as the positions of the deleted values and the class.
+
+
+# To get rid of these attributes, you can simply use the as.numeric function
+
+x <- as.numeric(na.omit(x))
+x
+
+```
+
+# 4. Arithmetic calculation on missing values
+
+Arithmetic calculation on missing values yield missing values. For example,
+
+```{r}
+# Regenerate x object as it has been updated by the previous R chunk.
+x <- c(1,2,3,4,NA)
+
+min(x)
+```
+```{r}
+max(x)
+```
+
+```{r}
+mean(x)
+```
+
+```{r}
+var(x)
+```
+
+In order to get arithmetic calculation results, we need to specify the option to deal with missing values. There are generally three options:
+
+- Listwise deletion: remove missing values or cases from analysis.
+- Imputation: replacing missing data with substituted values (for example replace by mean).
+
+## 4.1. Listwise deletion
+
+```{r}
+# Exclude missing values from analysis: Listwise Deletion
+min(x, na.rm = TRUE)
+```
+
+```{r}
+max(x, na.rm = TRUE)
+```
+
+```{r}
+mean(x, na.rm = TRUE)
+```
+
+```{r}
+var(x, na.rm = TRUE)
+```
+
+## 4.2. Simply imputation: Replace by mean
+
+```{r}
+print(x)
+```
+
+```{r}
+x[is.na(x)] <- mean(x, na.rm=TRUE)
+
+print(x)
+```
+
+Another method is to use dplyr::recode() function:
+
+x <- dplyr::recode(x, .missing = mean(x,na.rm = TRUE))
+
+```{r}
+# Regenerate x object as it has been updated by the previous R chunk.
+x <- c(1,2,3,4,NA)
+print(x)
+```
+
+```{r}
+# Use dplyr::recode() to replace missing values
+library(magrittr)
+x %>% dplyr::recode(.missing = mean(., na.rm=TRUE))
+```
+
+# 5. Representing missing values
+
+Missing values should be coded as NAs. Some missing values may not be correctly recorded. For example, it is natually to code missing strings as "" rather than NAs. In order for us to properly deal with missing values, we need to make sure that missing values are correctly coded as NAs.
+
+```{r}
+# Some missing values may not be correctly recorded
+y <- c("a","b","c","d","")
+is.na(y)
+```
+
+```{r}
+y[5] <- NA
+is.na(y)
+```
+
+# 6. Handling missing values in data frames
+
+First, let's generate a sample data frame with missing values.
+
+```{r}
+
+# Create a group variable
+g <- c(rep("group_1",5),rep("group_2",5))
+# Generate two random variables
+a <- rnorm(10, mean = 0, sd = 1)
+b <- a*0.5 + rnorm(10,mean = 0, sd = 1)
+a[4] <- NA
+b[7] <- NA
+
+dat <- data.frame(g,a,b)
+
+print(dat)
+```
+
+Then, let's try to use cor() to calculate correlation between columns a and b.
+
+```{r}
+cor(a,b)
+```
+
+We notice that correlation coefficient is NA as there are missing values in the two variables. In order to get a valid correlation coefficient, we have to specify the option of missing value. For example, we can specify the parameter "use" as "pairwise.complete.obs" to use listwise deletion method.
+
+```{r}
+cor(a,b, use = "pairwise.complete.obs")
+```
+
+For data frame aggregation operations, we also need to specify missing value handling methods if missing values are involved in the data aggregration process.
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+# Without specifying missing value handling method
+dat %>% group_by(g) %>% summarise(mean(a),mean(b))
+```
+
+```{r}
+# Use parameter na.rm=True in aggreation methods 
+dat %>% group_by(g) %>% summarise(mean(a, na.rm = TRUE),mean(b, na.rm = TRUE))
+```
+
+
+```{r}
+# Another way is to remove all missing value observations then summarize data
+dat %>% na.omit() %>% group_by(g) %>% summarise(mean(a),mean(b))
+```
+
+We notice that different methods lead to different results. In practice, you need to select a particular method with good justification.
